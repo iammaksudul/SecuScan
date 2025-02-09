@@ -4,16 +4,15 @@
 
 echo "Installing SecuScan Plugin..."
 
-# Create the plugin directory in the correct location
-PLUGIN_DIR="/usr/local/cpanel/whostmgr/docroot/cgi/secuScan/"
-mkdir -p $PLUGIN_DIR
+# Step 1: Create the plugin directory in the correct location
+mkdir -p /usr/local/cpanel/whostmgr/docroot/cgi/secuScan/
 
-# Copy the correct script files from the current directory
-cp /root/SecuScan/secuScan.sh $PLUGIN_DIR
-cp /root/SecuScan/index.html $PLUGIN_DIR
+# Step 2: Copy the plugin files to the appropriate directory
+cp /root/SecuScan/secuScan.sh /usr/local/cpanel/whostmgr/docroot/cgi/secuScan/
+cp /root/SecuScan/index.html /usr/local/cpanel/whostmgr/docroot/cgi/secuScan/
 
-# Create the cPanel configuration file for the plugin (plugin.conf)
-cat > $PLUGIN_DIR/plugin.conf << EOF
+# Step 3: Create the plugin configuration file (plugin.conf)
+cat > /usr/local/cpanel/whostmgr/docroot/cgi/secuScan/plugin.conf << EOF
 # Plugin Configuration for SecuScan
 name=SecuScan
 category=Security
@@ -28,20 +27,23 @@ enable_email_alerts=true
 alert_email="admin@example.com"  # Change this to your desired email address
 EOF
 
-# Set the appropriate permissions for the plugin directory and scripts
-chmod -R 755 $PLUGIN_DIR
-chmod +x $PLUGIN_DIR/secuScan.sh
+# Step 4: Set the correct permissions for the plugin directory and scripts
+chmod -R 755 /usr/local/cpanel/whostmgr/docroot/cgi/secuScan/
+chmod +x /usr/local/cpanel/whostmgr/docroot/cgi/secuScan/secuScan.sh
 
-# Register the plugin in WHM (Ensure the plugin is correctly registered in WHM)
-# Adding the plugin registration details
-if [ -f /usr/local/cpanel/scripts/register_plugin ]; then
-  /usr/local/cpanel/scripts/register_plugin --name="SecuScan" --category="Security" --path="$PLUGIN_DIR"
+# Step 5: Register the plugin with cPanel using the register_plugin.sh script
+# Ensure register_plugin.sh is in the correct directory
+if [ -f /usr/local/cpanel/whostmgr/docroot/cgi/secuScan/register_plugin.sh ]; then
+  echo "Registering the SecuScan plugin with cPanel..."
+  /usr/local/cpanel/whostmgr/docroot/cgi/secuScan/register_plugin.sh
 else
-  echo "register_plugin script not found. Please ensure cPanel is properly configured."
+  echo "register_plugin.sh script not found. Please ensure it exists and is in the correct directory."
+  exit 1
 fi
 
-# Restart cPanel service to register the plugin
-service cpanel restart
+# Step 6: Restart cPanel service
+echo "Restarting cPanel service to apply changes..."
+systemctl restart cpanel.service
 
-# Finish the installation process
+# Step 7: Installation complete
 echo "Installation completed. Access your plugin from WHM under the Plugins section!"
