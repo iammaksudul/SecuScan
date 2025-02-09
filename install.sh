@@ -5,14 +5,15 @@
 echo "Installing SecuScan Plugin..."
 
 # Create the plugin directory in the correct location
-mkdir -p /usr/local/cpanel/whostmgr/docroot/cgi/secuScan/
+PLUGIN_DIR="/usr/local/cpanel/whostmgr/docroot/cgi/secuScan/"
+mkdir -p $PLUGIN_DIR
 
 # Copy the correct script files from the current directory
-cp /root/cpanel-compromise-detection-plugin/secuScan.sh /usr/local/cpanel/whostmgr/docroot/cgi/secuScan/
-cp /root/cpanel-compromise-detection-plugin/index.html /usr/local/cpanel/whostmgr/docroot/cgi/secuScan/
+cp /root/SecuScan/secuScan.sh $PLUGIN_DIR
+cp /root/SecuScan/index.html $PLUGIN_DIR
 
 # Create the cPanel configuration file for the plugin (plugin.conf)
-cat > /usr/local/cpanel/whostmgr/docroot/cgi/secuScan/plugin.conf << EOF
+cat > $PLUGIN_DIR/plugin.conf << EOF
 # Plugin Configuration for SecuScan
 name=SecuScan
 category=Security
@@ -28,12 +29,19 @@ alert_email="admin@example.com"  # Change this to your desired email address
 EOF
 
 # Set the appropriate permissions for the plugin directory and scripts
-chmod -R 755 /usr/local/cpanel/whostmgr/docroot/cgi/secuScan/
-chmod +x /usr/local/cpanel/whostmgr/docroot/cgi/secuScan/secuScan.sh
+chmod -R 755 $PLUGIN_DIR
+chmod +x $PLUGIN_DIR/secuScan.sh
 
-# Register the plugin in WHM (optional step, make sure your plugin is registered correctly in WHM)
-# You can register it as part of the cPanel system to make it appear under the "Plugins" section
-/usr/local/cpanel/scripts/register_plugin --name="SecuScan" --category="Security" --path="/usr/local/cpanel/whostmgr/docroot/cgi/secuScan/"
+# Register the plugin in WHM (Ensure the plugin is correctly registered in WHM)
+# Adding the plugin registration details
+if [ -f /usr/local/cpanel/scripts/register_plugin ]; then
+  /usr/local/cpanel/scripts/register_plugin --name="SecuScan" --category="Security" --path="$PLUGIN_DIR"
+else
+  echo "register_plugin script not found. Please ensure cPanel is properly configured."
+fi
+
+# Restart cPanel service to register the plugin
+service cpanel restart
 
 # Finish the installation process
 echo "Installation completed. Access your plugin from WHM under the Plugins section!"
